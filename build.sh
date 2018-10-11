@@ -27,7 +27,9 @@ if [ -z "$FOUND" ]; then
   export "ROS_PACKAGE_PATH=$ROS_PACKAGE_PATH:$PARENT_DIR" # ensure $ROS_PACKAGE_PATH contains $PARENT_DIR
 fi
 
-mkdir build
+if [ ! -d "build" ]
+  mkdir build
+fi
 cd build
 cmake .. -DCMAKE_BUILD_TYPE=Release
 make
