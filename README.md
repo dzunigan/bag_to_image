@@ -19,7 +19,7 @@ Extract images and timestamps from a rosbag file.
    ```
    sudo apt install libgflags-dev
    ```
-* PNG library (1.2.54-1ubuntu1.1)
+* libpng (1.2.54-1ubuntu1.1)
    ```
    sudo apt install libpng-dev
    ```
