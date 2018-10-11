@@ -90,11 +90,14 @@ int main(int argc, char* argv[]) {
     boost::filesystem::path timestamp_file(FLAGS_timestamps_file);
 
     std::vector<int> compression_params = {CV_IMWRITE_PNG_COMPRESSION, static_cast<int>(FLAGS_compression_level)};
-    int w = std::to_string(std::distance(view.begin(), view.end())).size() + 1;
+    std::size_t n = std::distance(view.begin(), view.end());
+    int w = std::to_string(n).size() + 1;
 
     int ctr = 0;
     io::Records records;
-    for(rosbag::MessageInstance const m: view) {
+    for(rosbag::View::iterator it = view.begin(); it != view.end(); ++it) {
+        std::cout << "\r" << std::distance(view.begin(), it) + 1 << " / " << n << std::flush;
+        const rosbag::MessageInstance& m = *it;
         sensor_msgs::Image::ConstPtr msg = m.instantiate<sensor_msgs::Image>();
         if (msg != nullptr) {
             cv_bridge::CvImagePtr cv_ptr;
@@ -119,6 +122,7 @@ int main(int argc, char* argv[]) {
             ++ctr;
         }
     }
+    std::cout << std::endl;
 
     bag.close();
 
