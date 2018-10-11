@@ -1,0 +1,20 @@
+<package>
+  <name>bag_to_image</name>
+  <version>1.0.0</version>
+  <description>Extract images from a rosbag</description>
+
+  <maintainer email="dzuniga@uma.es">David Zuñiga-Noël</maintainer>
+
+  <license>GPLv3</license>
+
+  <url type="repository">https://github.com/dzunigan/bag_to_image</url>
+
+  <author email="dzuniga@uma.es">David Zuñiga-Noël</author>
+
+  <depend package="roscpp"/>
+  <depend package="rosbag"/>
+  <depend package="sensor_msgs"/>
+  <depend package="cv_bridge"/>
+
+</package>
+
