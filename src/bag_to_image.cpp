@@ -3,9 +3,11 @@
     "bag_to_image"
 
 #define FLAGS_CASES                                                                                \
-    FLAG_CASE(string, images_path, "images", "Output images path")                                 \
+    FLAG_CASE(string, output_path, "", "Output images path")                                       \
+    FLAG_CASE(string, images_dir, "images", "Output images path")                                  \
     FLAG_CASE(string, timestamps_file, "timestamps.txt", "Output timestamps file")                 \
-    FLAG_CASE(bool, show_images, true, "Preview images while extracting them")
+    FLAG_CASE(uint64, compression_level, 9, "PNG compression level (0-9)")                         \
+    FLAG_CASE(bool, show_images, false, "Preview images while extracting them")
 
 #define ARGS_CASES                                                                                 \
     ARG_CASE(rosbag)                                                                               \
@@ -37,9 +39,15 @@
 static const std::string OPENCV_WINDOW = "Image window";
 
 void ValidateFlags() {
-    boost::filesystem::create_directory(FLAGS_images_path);
-    RUNTIME_ASSERT(boost::filesystem::is_empty(FLAGS_images_path));
-    RUNTIME_ASSERT(boost::filesystem::exists(FLAGS_timestamps_file));
+    if (!FLAGS_output_path.empty()) {
+        RUNTIME_ASSERT(boost::filesystem::is_directory(FLAGS_output_path));
+    } else {
+        FLAGS_output_path = boost::filesystem::current_path().string();
+    }
+    boost::filesystem::create_directory(boost::filesystem::path(FLAGS_output_path) / FLAGS_images_dir);
+    RUNTIME_ASSERT(boost::filesystem::is_empty(FLAGS_images_dir));
+    RUNTIME_ASSERT(!boost::filesystem::exists(FLAGS_timestamps_file));
+    RUNTIME_ASSERT(FLAGS_compression_level < 10);
 }
 
 void ValidateArgs() {
@@ -77,10 +85,11 @@ int main(int argc, char* argv[]) {
     rosbag::View view(bag, rosbag::TopicQuery(topics));
 
     // Prepare output
-    boost::filesystem::path output_dir(FLAGS_images_path);
+    boost::filesystem::path output_path(FLAGS_output_path);
+    boost::filesystem::path images_dir(FLAGS_images_dir);
     boost::filesystem::path timestamp_file(FLAGS_timestamps_file);
 
-    std::vector<int> compression_params = {CV_IMWRITE_PNG_COMPRESSION, 9};
+    std::vector<int> compression_params = {CV_IMWRITE_PNG_COMPRESSION, static_cast<int>(FLAGS_compression_level)};
     int w = std::to_string(std::distance(view.begin(), view.end())).size() + 1;
 
     int ctr = 0;
@@ -102,10 +111,10 @@ int main(int argc, char* argv[]) {
             }
 
             std::string image_name = io::to_string(ctr, w) + ".png";
-            boost::filesystem::path image_path = output_dir / image_name;
+            boost::filesystem::path image_path = output_path / images_dir / image_name;
             cv::imwrite(image_path.string(), cv_ptr->image, compression_params);
 
-            records.emplace_back(std::make_pair(msg->header.stamp.toSec(), image_name));
+            records.emplace_back(std::make_pair(msg->header.stamp.toSec(), (images_dir / image_name).string()));
 
             ++ctr;
         }
