@@ -27,7 +27,7 @@ if [ -z "$FOUND" ]; then
   export "ROS_PACKAGE_PATH=$ROS_PACKAGE_PATH:$PARENT_DIR" # ensure $ROS_PACKAGE_PATH contains $PARENT_DIR
 fi
 
-if [ ! -d "build" ]
+if [ ! -d "build" ]; then
   mkdir build
 fi
 cd build
