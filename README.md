@@ -19,7 +19,11 @@ Extract images and timestamps from a rosbag file.
    ```
    sudo apt install libgflags-dev
    ```
-
+* PNG library (1.2.54-1ubuntu1.1)
+   ```
+   sudo apt install libpng-dev
+   ```
+   
 ## 2. Build
 
 Once all dependencies are installed, proceed to build the source code with the automated build script provided. Simply run the following commands:
