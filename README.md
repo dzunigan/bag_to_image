@@ -12,7 +12,9 @@ Extract images and timestamps from a rosbag file.
    sudo apt install cmake
    ```
 * ROS (Kinetic Kame)
-   See [ROS installation](http://wiki.ros.org/kinetic/Installation)
+
+   See [ROS installation](http://wiki.ros.org/kinetic/Installation).
+
 * Gflags (2.1.2-3)
    ```
    sudo apt install libgflags-dev
