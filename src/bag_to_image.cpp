@@ -7,6 +7,9 @@
     FLAG_CASE(string, images_dir, "images", "Output images path")                                  \
     FLAG_CASE(string, timestamps_file, "timestamps.txt", "Output timestamps file")                 \
     FLAG_CASE(uint64, compression_level, 9, "PNG compression level (0-9)")                         \
+    FLAG_CASE(uint64, o, 0, "Sequence offset")                                                     \
+    FLAG_CASE(uint64, n, 0, "Max sequence length")                                                 \
+    FLAG_CASE(uint64, s, 0, "Skip sequence elements")                                              \
     FLAG_CASE(bool, show_images, false, "Preview images while extracting them")
 
 #define ARGS_CASES                                                                                 \
@@ -15,6 +18,7 @@
 
 #include <iostream>
 #include <iterator>
+#include <limits>
 #include <string>
 #include <vector>
 
@@ -38,6 +42,13 @@
 
 static const std::string OPENCV_WINDOW = "Image window";
 
+inline std::string to_string(size_t n, int w) {
+
+    std::stringstream ss;
+    ss << std::setw(w) << std::setfill('0') << n;
+    return ss.str();
+}
+
 void ValidateFlags() {
     if (!FLAGS_output_path.empty()) {
         RUNTIME_ASSERT(boost::filesystem::is_directory(FLAGS_output_path));
@@ -48,6 +59,9 @@ void ValidateFlags() {
     RUNTIME_ASSERT(boost::filesystem::is_empty(FLAGS_images_dir));
     RUNTIME_ASSERT(!boost::filesystem::exists(FLAGS_timestamps_file));
     RUNTIME_ASSERT(FLAGS_compression_level < 10);
+    if (FLAGS_n == 0) {
+        FLAGS_n = std::numeric_limits<std::size_t>::max();
+    }
 }
 
 void ValidateArgs() {
@@ -90,13 +104,16 @@ int main(int argc, char* argv[]) {
     boost::filesystem::path timestamp_file(FLAGS_timestamps_file);
 
     std::vector<int> compression_params = {CV_IMWRITE_PNG_COMPRESSION, static_cast<int>(FLAGS_compression_level)};
-    std::size_t n = std::distance(view.begin(), view.end());
+    size_t num_images = std::distance(view.begin(), view.end());
+    RUNTIME_ASSERT(FLAGS_o < num_images);
+    size_t n = std::min(FLAGS_n, static_cast<std::size_t>(std::ceil(static_cast<double>(num_images - FLAGS_o) / static_cast<double>(FLAGS_s + 1))));
     int w = std::to_string(n).size() + 1;
 
-    int ctr = 0;
     io::Records records;
-    for(rosbag::View::iterator it = view.begin(); it != view.end(); ++it) {
-        std::cout << "\r" << std::distance(view.begin(), it) + 1 << " / " << n << std::flush;
+    rosbag::View::iterator it = view.begin();
+    std::advance(it, FLAGS_o);
+    for(size_t ctr = 0; ctr < n; ++ctr) {
+        std::cout << "\r" << (ctr + 1) << " / " << n << std::flush;
         const rosbag::MessageInstance& m = *it;
         sensor_msgs::Image::ConstPtr msg = m.instantiate<sensor_msgs::Image>();
         if (msg != nullptr) {
@@ -113,13 +130,13 @@ int main(int argc, char* argv[]) {
                 cv::waitKey(3);
             }
 
-            std::string image_name = io::to_string(ctr, w) + ".png";
+            std::string image_name = to_string(ctr, w) + ".png";
             boost::filesystem::path image_path = output_path / images_dir / image_name;
             cv::imwrite(image_path.string(), cv_ptr->image, compression_params);
 
             records.emplace_back(std::make_pair(msg->header.stamp.toSec(), (images_dir / image_name).string()));
 
-            ++ctr;
+            std::advance(it, FLAGS_s + 1);
         }
     }
     std::cout << std::endl;
