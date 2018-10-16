@@ -107,7 +107,7 @@ int main(int argc, char* argv[]) {
     size_t num_images = std::distance(view.begin(), view.end());
     RUNTIME_ASSERT(FLAGS_o < num_images);
     size_t n = std::min(FLAGS_n, static_cast<std::size_t>(std::ceil(static_cast<double>(num_images - FLAGS_o) / static_cast<double>(FLAGS_s + 1))));
-    int w = std::to_string(n).size() + 1;
+    //int w = std::to_string(n).size() + 1;
 
     io::Records records;
     rosbag::View::iterator it = view.begin();
@@ -130,11 +130,14 @@ int main(int argc, char* argv[]) {
                 cv::waitKey(3);
             }
 
-            std::string image_name = to_string(ctr, w) + ".png";
+            unsigned long ns = static_cast<unsigned long>(msg->header.stamp.toSec() * 1e9);
+
+            std::string image_name = std::to_string(ns) + ".png";
             boost::filesystem::path image_path = output_path / images_dir / image_name;
+            cv::rotate(cv_ptr->image, cv_ptr->image, 1);
             cv::imwrite(image_path.string(), cv_ptr->image, compression_params);
 
-            records.emplace_back(std::make_pair(msg->header.stamp.toSec(), (images_dir / image_name).string()));
+            records.emplace_back(std::make_pair(ns, image_name));
 
             std::advance(it, FLAGS_s + 1);
         }

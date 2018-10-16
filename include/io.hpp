@@ -14,7 +14,8 @@ namespace io {
 
 // Types
 
-using record_t = std::pair<double, std::string>;
+//using record_t = std::pair<double, std::string>;
+using record_t = std::pair<unsigned long, std::string>;
 
 struct pose_t {
     double tx, ty, theta;
@@ -85,7 +86,7 @@ inline std::istream& operator>>(std::istream &lhs, trajectory_t<T> &rhs) {
 
 inline std::ostream& operator<<(std::ostream &lhs, const record_t &rhs) {
 
-    lhs << to_string(rhs.first, 9) << " " << rhs.second;
+    lhs << std::to_string(rhs.first) << ',' << rhs.second;
     return lhs;
 }
 
