@@ -4,12 +4,9 @@
 
 #define FLAGS_CASES                                                                                \
     FLAG_CASE(string, output_path, "", "Output images path")                                       \
-    FLAG_CASE(string, images_dir, "images", "Output images path")                                  \
-    FLAG_CASE(string, timestamps_file, "timestamps.txt", "Output timestamps file")                 \
+    FLAG_CASE(string, images_dir, "data", "Output images path")                                    \
+    FLAG_CASE(string, timestamps_file, "data.csv", "Output timestamps file")                       \
     FLAG_CASE(uint64, compression_level, 9, "PNG compression level (0-9)")                         \
-    FLAG_CASE(uint64, o, 0, "Sequence offset")                                                     \
-    FLAG_CASE(uint64, n, 0, "Max sequence length")                                                 \
-    FLAG_CASE(uint64, s, 0, "Skip sequence elements")                                              \
     FLAG_CASE(bool, show_images, false, "Preview images while extracting them")
 
 #define ARGS_CASES                                                                                 \
@@ -59,9 +56,9 @@ void ValidateFlags() {
     RUNTIME_ASSERT(boost::filesystem::is_empty(FLAGS_images_dir));
     RUNTIME_ASSERT(!boost::filesystem::exists(FLAGS_timestamps_file));
     RUNTIME_ASSERT(FLAGS_compression_level < 10);
-    if (FLAGS_n == 0) {
-        FLAGS_n = std::numeric_limits<std::size_t>::max();
-    }
+//    if (FLAGS_n == 0) {
+//        FLAGS_n = std::numeric_limits<std::size_t>::max();
+//    }
 }
 
 void ValidateArgs() {
@@ -105,13 +102,14 @@ int main(int argc, char* argv[]) {
 
     std::vector<int> compression_params = {CV_IMWRITE_PNG_COMPRESSION, static_cast<int>(FLAGS_compression_level)};
     size_t num_images = std::distance(view.begin(), view.end());
-    RUNTIME_ASSERT(FLAGS_o < num_images);
-    size_t n = std::min(FLAGS_n, static_cast<std::size_t>(std::ceil(static_cast<double>(num_images - FLAGS_o) / static_cast<double>(FLAGS_s + 1))));
+    //RUNTIME_ASSERT(FLAGS_o < num_images);
+    //size_t n = std::min(FLAGS_n, static_cast<std::size_t>(std::ceil(static_cast<double>(num_images - FLAGS_o) / static_cast<double>(FLAGS_s + 1))));
+    size_t n = num_images;
     //int w = std::to_string(n).size() + 1;
 
     io::Records records;
     rosbag::View::iterator it = view.begin();
-    std::advance(it, FLAGS_o);
+    //std::advance(it, FLAGS_o);
     for(size_t ctr = 0; ctr < n; ++ctr) {
         std::cout << "\r" << (ctr + 1) << " / " << n << std::flush;
         const rosbag::MessageInstance& m = *it;
@@ -139,7 +137,8 @@ int main(int argc, char* argv[]) {
 
             records.emplace_back(std::make_pair(ns, image_name));
 
-            std::advance(it, FLAGS_s + 1);
+            //std::advance(it, FLAGS_s + 1);
+            std::advance(it, 1);
         }
     }
     std::cout << std::endl;

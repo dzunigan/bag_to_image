@@ -33,9 +33,11 @@ cd bag_to_image
 bash build.sh
 ```
 
+The compiled executable should be inside the `bin` directory.
+
 ## 3. Data Format
 
-The input is a rosbag file and the topic where the images were published. The output is the sequence of images, compressed in PNG format and a text file with correspoinding timestamps: for image 0000.png the associated timestamp is stored in row 0, for 01000.png in row 1000 and so on.
+The input is a rosbag file and the topic where the images were published. The output is the sequence of images, compressed in PNG format and a CSV file with correspoinding timestamps in nanoseconds.
 
 ## 4. Usage
 
@@ -45,8 +47,12 @@ bag_to_image [options] <rosbag> <topic>
 ```
 where the available options are:
 
-* `--images_path=desired_path`: to set the output images path
+* `--output_path=desired_path`: to set the output root directory
 
-* `--timestamps_file=desired_file`: to set the output timestamps file
+* `--images_dir=desired_dir`: to set the images directory name (inside output directory)
+
+* `--timestamps_file=desired_file`: to set the output timestamps filename (inside output directory)
+
+* `--compression_level=compression_level`: to set the PNG compression level (between 0-9)
 
 * `--show_images`: to preview the images during extraction
