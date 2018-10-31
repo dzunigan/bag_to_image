@@ -53,8 +53,8 @@ void ValidateFlags() {
         FLAGS_output_path = boost::filesystem::current_path().string();
     }
     boost::filesystem::create_directory(boost::filesystem::path(FLAGS_output_path) / FLAGS_images_dir);
-    RUNTIME_ASSERT(boost::filesystem::is_empty(FLAGS_images_dir));
-    RUNTIME_ASSERT(!boost::filesystem::exists(FLAGS_timestamps_file));
+    RUNTIME_ASSERT(boost::filesystem::is_empty(boost::filesystem::path(FLAGS_output_path) / FLAGS_images_dir));
+    RUNTIME_ASSERT(!boost::filesystem::exists(boost::filesystem::path(FLAGS_output_path) / FLAGS_timestamps_file));
     RUNTIME_ASSERT(FLAGS_compression_level < 10);
 //    if (FLAGS_n == 0) {
 //        FLAGS_n = std::numeric_limits<std::size_t>::max();
