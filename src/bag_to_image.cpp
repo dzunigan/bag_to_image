@@ -145,7 +145,7 @@ int main(int argc, char* argv[]) {
 
     bag.close();
 
-    io::write_file(records, timestamp_file.string());
+    io::write_file(records, (output_path / timestamp_file).string());
 
     return 0;
 }
