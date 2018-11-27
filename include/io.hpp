@@ -42,6 +42,10 @@ using Trajectory = std::vector<trajectory_t<double>>;
 
 // Comparators
 
+inline bool operator<(const record_t& lhs, const record_t& rhs) {
+    return (lhs.first < rhs.first);
+}
+
 template<typename T>
 inline bool operator<(const trajectory_t<T> &lhs, const trajectory_t<T> &rhs) {
     return (lhs.id < rhs.id);
