@@ -3,6 +3,7 @@
 
 // STL
 #include <algorithm>
+#include <cstdint>
 #include <fstream>
 #include <iomanip>
 #include <sstream>
@@ -13,9 +14,10 @@
 namespace io {
 
 // Types
+using timestamp_t = std::uint64_t;
 
 //using record_t = std::pair<double, std::string>;
-using record_t = std::pair<unsigned long, std::string>;
+using record_t = std::pair<timestamp_t, std::string>;
 
 struct pose_t {
     double tx, ty, theta;

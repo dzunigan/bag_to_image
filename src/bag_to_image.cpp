@@ -38,6 +38,8 @@
 #include "io.hpp"
 #include "macros.h"
 
+using timestamp_t = io::timestamp_t;
+
 static const std::string OPENCV_WINDOW = "Image window";
 
 inline std::string to_string(size_t n, int w) {
@@ -47,8 +49,8 @@ inline std::string to_string(size_t n, int w) {
     return ss.str();
 }
 
-inline unsigned long timestamp(const ros::Time& t) {
-    return static_cast<unsigned long>(t.nsec) + static_cast<unsigned long>(t.sec) * 1000000000ul;
+inline timestamp_t timestamp(const ros::Time& t) {
+    return static_cast<timestamp_t>(t.nsec) + static_cast<timestamp_t>(t.sec) * static_cast<timestamp_t>(1000000000ull);
 }
 
 void ValidateFlags() {
@@ -133,7 +135,7 @@ int main(int argc, char* argv[]) {
                 cv::waitKey(3);
             }
 
-            unsigned long ns = timestamp(msg->header.stamp);
+            timestamp_t ns = timestamp(msg->header.stamp);
 
             std::string image_name = std::to_string(ns) + ".png";
             boost::filesystem::path image_path = output_path / images_dir / image_name;
