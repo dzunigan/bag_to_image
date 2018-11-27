@@ -13,6 +13,7 @@
     ARG_CASE(rosbag)                                                                               \
     ARG_CASE(topic)
 
+#include <algorithm>
 #include <iostream>
 #include <iterator>
 #include <limits>
@@ -44,6 +45,10 @@ inline std::string to_string(size_t n, int w) {
     std::stringstream ss;
     ss << std::setw(w) << std::setfill('0') << n;
     return ss.str();
+}
+
+inline unsigned long timestamp(const ros::Time& t) {
+    return static_cast<unsigned long>(t.nsec) + static_cast<unsigned long>(t.sec) * 1000000000ul;
 }
 
 void ValidateFlags() {
@@ -128,7 +133,7 @@ int main(int argc, char* argv[]) {
                 cv::waitKey(3);
             }
 
-            unsigned long ns = static_cast<unsigned long>(msg->header.stamp.toSec() * 1e9);
+            unsigned long ns = timestamp(msg->header.stamp);
 
             std::string image_name = std::to_string(ns) + ".png";
             boost::filesystem::path image_path = output_path / images_dir / image_name;
@@ -145,6 +150,7 @@ int main(int argc, char* argv[]) {
 
     bag.close();
 
+    std::sort(records.begin(), records.end());
     io::write_file(records, (output_path / timestamp_file).string());
 
     return 0;
